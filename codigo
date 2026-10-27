@@ -1,39 +1,56 @@
-# Projeto: Calculo de determinantes (matriz 2x2 e 3x3)
-# Regra de negocio: se o determinante for diferente de zero, o acesso e liberado.
+estoque = {
+    "Caderno": {"preco": 15.90, "quantidade": 20},
+    "Caneta": {"preco": 2.50, "quantidade": 3},
+    "Mochila": {"preco": 89.99, "quantidade": 5},
+    "Lapis": {"preco": 1.20, "quantidade": 2},
+    "Borracha": {"preco": 1.80, "quantidade": 15},
+}
 
-def determinante_2x2(m):
-    # Multiplica a diagonal principal e subtrai a multiplicacao da outra diagonal
-    return m[0][0] * m[1][1] - m[0][1] * m[1][0]
-
-
-def determinante_3x3(m):
-    # Regra de Sarrus
-    principais = (m[0][0] * m[1][1] * m[2][2]
-                  + m[0][1] * m[1][2] * m[2][0]
-                  + m[0][2] * m[1][0] * m[2][1])
-    secundarias = (m[0][2] * m[1][1] * m[2][0]
-                   + m[0][0] * m[1][2] * m[2][1]
-                   + m[0][1] * m[1][0] * m[2][2])
-    return principais - secundarias
+LIMITE_MINIMO = 5  # abaixo disso o produto precisa ser reposto
 
 
-def verificar_acesso(det):
-    # Regra de negocio: determinante diferente de zero libera o acesso
-    if det != 0:
-        return "ACESSO LIBERADO"
-    return "ACESSO NEGADO"
+def mostrar_estoque(produtos):
+    print("=== ESTOQUE ATUAL ===")
+    for nome, dados in produtos.items():
+        print(f"{nome}: {dados['quantidade']} unidades - R$ {dados['preco']:.2f} cada")
 
 
-# Matrizes de teste
-matriz_a = [[4, 3],
-            [6, 8]]
+def produtos_em_falta(produtos, limite):
+    # Guarda numa lista os produtos com pouca quantidade
+    lista = []
+    for nome, dados in produtos.items():
+        if dados["quantidade"] < limite:
+            lista.append(nome)
+    return lista
 
-matriz_b = [[1, 2, 3],
-            [4, 5, 6],
-            [7, 8, 9]]
 
-det_a = determinante_2x2(matriz_a)
-det_b = determinante_3x3(matriz_b)
+def valor_total(produtos):
+    # Soma preco x quantidade de cada produto
+    total = 0
+    for dados in produtos.values():
+        total += dados["preco"] * dados["quantidade"]
+    return total
 
-print("Matriz 2x2 -> determinante =", det_a, "->", verificar_acesso(det_a))
-print("Matriz 3x3 -> determinante =", det_b, "->", verificar_acesso(det_b))
+
+def vender(produtos, nome, quantidade):
+    # Regra: so vende se tiver quantidade suficiente no estoque
+    if nome not in produtos:
+        print(f"Produto '{nome}' nao existe.")
+    elif produtos[nome]["quantidade"] < quantidade:
+        print(f"Venda negada: so tem {produtos[nome]['quantidade']} de {nome}.")
+    else:
+        produtos[nome]["quantidade"] -= quantidade
+        print(f"Venda realizada: {quantidade} de {nome}.")
+
+
+mostrar_estoque(estoque)
+
+print("\nValor total em estoque: R$ %.2f" % valor_total(estoque))
+
+print("\n=== SIMULANDO VENDAS ===")
+vender(estoque, "Mochila", 2)
+vender(estoque, "Caneta", 10)
+
+print("\n=== PRODUTOS PARA REPOR ===")
+for produto in produtos_em_falta(estoque, LIMITE_MINIMO):
+    print("- " + produto)
